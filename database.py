@@ -378,4 +378,29 @@ def get_player_role(nickname):
     result = cursor.fetchone()
     conn.close()
     return result[0] if result else 'player'
+def update_player_nickname(old_nickname, new_nickname):
+    """Изменяет никнейм игрока"""
+    if not new_nickname.strip():
+        return True, "Никнейм не изменен"
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE players SET nickname = ? WHERE nickname = ?", (new_nickname.strip(), old_nickname))
+        conn.commit()
+        return True, "Никнейм успешно изменен"
+    except sqlite3.IntegrityError:
+        return False, "Игрок с таким никнеймом уже существует"
+    finally:
+        conn.close()
+def update_player_password(nickname, new_password):
+    """Изменяет пароль игрока"""
+    if not new_password.strip():
+        return True, "Пароль не изменен"
+    conn = get_connection()
+    cursor = conn.cursor()
+    hashed = hash_password(new_password)
+    cursor.execute("UPDATE players SET password = ? WHERE nickname = ?", (hashed, nickname))
+    conn.commit()
+    conn.close()
+    return True, "Пароль успешно изменен"
 init_db()
