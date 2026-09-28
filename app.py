@@ -5,7 +5,7 @@ import database as db
 from datetime import datetime
 from streamlit_autorefresh import st_autorefresh
 
-st.set_page_config(page_title="TL DKP System", page_icon="⚔️", layout="wide")
+st.set_page_config(page_title="TL DKP Гильдия HEID", page_icon="⚔️", layout="wide")
 
 # ===================== АВТОРИЗАЦИЯ =====================
 if "logged_in" not in st.session_state:
