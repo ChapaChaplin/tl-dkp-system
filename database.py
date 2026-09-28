@@ -327,5 +327,47 @@ def get_all_transactions():
     transactions = cursor.fetchall()
     conn.close()
     return transactions
+# ========== ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ УПРАВЛЕНИЯ ==========
 
+def update_player_class(nickname, new_class):
+    """Изменяет класс игрока"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE players SET class = ? WHERE nickname = ?", (new_class, nickname))
+    conn.commit()
+    conn.close()
+    return True, f"Класс изменен на '{new_class}'"
+
+def delete_player(nickname):
+    """
+    Полностью удаляет игрока и все связанные данные:
+    - транзакции
+    - ставки на аукционах
+    - саму запись игрока
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Получаем ID игрока
+    cursor.execute("SELECT id FROM players WHERE nickname = ?", (nickname,))
+    player = cursor.fetchone()
+    if not player:
+        conn.close()
+        return False, "Игрок не найден"
+    
+    player_id = player[0]
+    
+    # Удаляем связанные данные (каскадно)
+    cursor.execute("DELETE FROM transactions WHERE player_id = ?", (player_id,))
+    cursor.execute("DELETE FROM bids WHERE player_id = ?", (player_id,))
+    
+    # Сбрасываем ссылки на игрока в аукционах (если он был победителем)
+    cursor.execute("UPDATE auctions SET current_winner_id = NULL WHERE current_winner_id = ?", (player_id,))
+    
+    # Удаляем самого игрока
+    cursor.execute("DELETE FROM players WHERE id = ?", (player_id,))
+    
+    conn.commit()
+    conn.close()
+    return True, f"Игрок '{nickname}' и все его данные удалены"
 init_db()
