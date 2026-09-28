@@ -370,7 +370,7 @@ def delete_player(nickname):
     conn.commit()
     conn.close()
     return True, f"Игрок '{nickname}' и все его данные удалены"
-def get_player_role(nickname):
+def update_player_role(nickname):
     """Возвращает роль игрока (admin или player)"""
     conn = get_connection()
     cursor = conn.cursor()
