@@ -200,7 +200,6 @@ if is_admin:
                 target_player = st.selectbox("🎯 Выбери игрока", player_names)
                 
                 # Показываем текущие данные
-                current_role = db.get_player_role(target_player)
                 
                 st.markdown("---")
                 st.markdown("**Что изменить?** *(оставь пустым, если не хочешь менять)*")
