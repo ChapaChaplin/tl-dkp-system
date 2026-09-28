@@ -214,12 +214,7 @@ if is_admin:
                     new_class = st.selectbox(
                         "⚔️ Класс", 
                         ["Воин", "Рыцарь", "Ассасин", "Лучник", "Маг", "Жрец", "Другое"]
-                    )
-                    new_role = st.selectbox(
-                        "👑 Роль", 
-                        ["player", "admin"], 
-                        index=0 if current_role == 'player' else 1
-                    )
+  
                 
                 edit_submitted = st.form_submit_button("💾 Сохранить изменения", use_container_width=True, type="primary")
                 
