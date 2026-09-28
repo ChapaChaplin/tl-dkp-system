@@ -213,7 +213,7 @@ if is_admin:
                     current_class = st.session_state.player_class if target_player == st.session_state.nickname else "Воин"
                     new_class = st.selectbox(
                         "⚔️ Класс", 
-                        ["Воин", "Рыцарь", "Ассасин", "Лучник", "Маг", "Жрец", "Другое"]
+                        ["Воин", "Рыцарь", "Ассасин", "Лучник", "Маг", "Жрец", "Другое"])
   
                 
                 edit_submitted = st.form_submit_button("💾 Сохранить изменения", use_container_width=True, type="primary")
