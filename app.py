@@ -12,7 +12,7 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 if not st.session_state.logged_in:
-    st.title("⚔️ Система DKP для Throne and Liberty")
+    st.title("⚔️ Система DKP Гильдии HEID")
     st.markdown("### Войди в свой аккаунт или зарегистрируйся")
 
     tab_login, tab_register = st.tabs(["🔑 Вход", "📝 Регистрация"])
@@ -97,7 +97,7 @@ with t1:
     active_auctions = db.get_active_auctions()
 
     if not active_auctions:
-        st.info("Сейчас нет активных аукционов. Аукцион обновляется каждые 5 секунд.")
+        st.info("Сейчас нет активных аукционов.")
     else:
         for auc in active_auctions:
             auc_id, item_name, start_price, current_max, end_time, winner_name = auc
