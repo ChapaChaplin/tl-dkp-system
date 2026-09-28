@@ -1,0 +1,4 @@
+tl_dkp.db
+__pycache__/
+*.pyc
+.streamlit/
