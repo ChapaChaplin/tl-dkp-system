@@ -183,25 +183,127 @@ if is_admin:
             st.info("Нет игроков")
 
     # --- ➕ Игроки ---
+        # --- ⚙️ Управление игроками ---
     with t3:
-        st.subheader("➕ Добавить игрока")
-        with st.form("add_player_form"):
-            nickname = st.text_input("Никнейм")
-            password = st.text_input("Пароль для игрока", type="password")
-            player_class = st.selectbox("Класс", ["Воин", "Рыцарь", "Ассасин", "Лучник", "Маг", "Жрец", "Другое"])
-            starting_dkp = st.number_input("Стартовый DKP", min_value=0, value=100, step=10)
-            submitted = st.form_submit_button("Добавить")
-            if submitted:
-                if nickname.strip() and password:
-                    success, message = db.register_player(nickname.strip(), password, player_class, 'player', starting_dkp)
+        st.subheader("⚙️ Управление учетными записями")
+        st.caption("Выбери игрока и измени любые данные его аккаунта.")
+        
+        players = db.get_all_players()
+        
+        if players:
+            player_names = [p[0] for p in players]
+            
+            # === БЛОК 1: РЕДАКТИРОВАНИЕ ===
+            st.markdown("#### ✏️ Редактирование аккаунта")
+            
+            with st.form("edit_player_form"):
+                target_player = st.selectbox("🎯 Выбери игрока", player_names)
+                
+                # Показываем текущие данные
+                current_role = db.get_player_role(target_player)
+                
+                st.markdown("---")
+                st.markdown("**Что изменить?** *(оставь пустым, если не хочешь менять)*")
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    new_nickname = st.text_input("🆕 Новый никнейм")
+                    new_password = st.text_input("🔑 Новый пароль", type="password")
+                with col2:
+                    current_class = st.session_state.player_class if target_player == st.session_state.nickname else "Воин"
+                    new_class = st.selectbox(
+                        "⚔️ Класс", 
+                        ["Воин", "Рыцарь", "Ассасин", "Лучник", "Маг", "Жрец", "Другое"]
+                    )
+                    new_role = st.selectbox(
+                        "👑 Роль", 
+                        ["player", "admin"], 
+                        index=0 if current_role == 'player' else 1
+                    )
+                
+                edit_submitted = st.form_submit_button("💾 Сохранить изменения", use_container_width=True, type="primary")
+                
+                if edit_submitted:
+                    changes_made = []
+                    
+                    # 1. Меняем никнейм
+                    if new_nickname.strip() and new_nickname.strip() != target_player:
+                        success, message = db.update_player_nickname(target_player, new_nickname)
+                        if success:
+                            changes_made.append(f"✅ Никнейм: {target_player} → {new_nickname.strip()}")
+                            target_player = new_nickname.strip()
+                        else:
+                            st.error(f"❌ Никнейм: {message}")
+                    
+                    # 2. Меняем пароль
+                    if new_password.strip():
+                        success, message = db.update_player_password(target_player, new_password)
+                        if success:
+                            changes_made.append(f"✅ Пароль изменен")
+                        else:
+                            st.error(f"❌ Пароль: {message}")
+                    
+                    # 3. Меняем класс
+                    success, message = db.update_player_class(target_player, new_class)
                     if success:
-                        st.success(f"✅ {message}")
+                        changes_made.append(f"✅ Класс: {new_class}")
+                    
+                    # 4. Меняем роль
+                    success, message = db.update_player_role(target_player, new_role)
+                    if success:
+                        changes_made.append(f"✅ Роль: {new_role}")
+                    
+                    if changes_made:
+                        st.success("Изменения сохранены:")
+                        for change in changes_made:
+                            st.caption(change)
+                        
+                        # Если админ изменил свои собственные данные — выходим, чтобы применить
+                        if target_player == st.session_state.nickname:
+                            if new_nickname.strip() and new_nickname.strip() != st.session_state.nickname:
+                                st.warning("⚠️ Ты изменил свой никнейм. Выйди и войди заново.")
+                            if new_role != st.session_state.role:
+                                st.warning("⚠️ Ты изменил свою роль. Выйди и войди заново.")
+                        
+                        st.balloons()
                         st.rerun()
-                    else:
-                        st.error(f"❌ {message}")
+            
+            st.markdown("---")
+            
+            # === БЛОК 2: УДАЛЕНИЕ ===
+            st.markdown("#### 🗑️ Удаление аккаунта")
+            st.warning("⚠️ **Внимание!** Это действие необратимо. Будут удалены:")
+            st.caption("• Все транзакции (история DKP)\n• Все ставки на аукционах\n• Сам аккаунт игрока")
+            
+            with st.form("delete_player_form"):
+                player_to_delete = st.selectbox("🎯 Выбери игрока для удаления", player_names, key="delete_select")
+                
+                # Защита от удаления самого себя
+                if player_to_delete == st.session_state.nickname:
+                    st.error("🚫 Ты не можешь удалить сам себя!")
+                    confirm_delete = False
                 else:
-                    st.warning("Заполни все поля!")
-
+                    confirm_delete = st.checkbox(f"☑️ Я подтверждаю удаление игрока **{player_to_delete}**")
+                
+                delete_submitted = st.form_submit_button(
+                    "🗑️ Удалить аккаунт", 
+                    use_container_width=True,
+                    disabled=(player_to_delete == st.session_state.nickname),
+                    type="secondary"
+                )
+                
+                if delete_submitted:
+                    if confirm_delete:
+                        success, message = db.delete_player(player_to_delete)
+                        if success:
+                            st.success(f"✅ {message}")
+                            st.rerun()
+                        else:
+                            st.error(f"❌ {message}")
+                    else:
+                        st.warning("Поставь галочку подтверждения!")
+        else:
+            st.info("В базе пока нет игроков.")
     # --- 💰 DKP ---
     with t4:
         st.subheader("💰 Изменить DKP")
