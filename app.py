@@ -56,7 +56,7 @@ if not st.session_state.logged_in:
 # ===================== ОСНОВНОЙ ИНТЕРФЕЙС =====================
 
 # Автообновление каждые 10 секунд
-st_autorefresh(interval=5000, key="auction_refresh")
+st_autorefresh(interval=1000, key="auction_refresh")
 
 # Обновляем баланс из БД
 fresh_dkp = db.get_player_dkp(st.session_state.nickname)
