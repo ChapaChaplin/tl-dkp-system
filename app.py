@@ -43,7 +43,7 @@ if not st.session_state.logged_in:
             reg_submitted = st.form_submit_button("Зарегистрироваться", use_container_width=True)
             if reg_submitted:
                 if new_nick.strip() and new_pass:
-                    success, message = db.register_player(new_nick.strip(), new_pass, new_class, starting_dkp=100)
+                    success, message = db.register_player(new_nick.strip(), new_pass, new_class, starting_dkp=10)
                     if success:
                         st.success(f"✅ {message}! Стартовый баланс: 10 DKP. Теперь войди на вкладке «Вход».")
                     else:
