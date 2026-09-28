@@ -370,14 +370,6 @@ def delete_player(nickname):
     conn.commit()
     conn.close()
     return True, f"Игрок '{nickname}' и все его данные удалены"
-def update_player_role(nickname):
-    """Возвращает роль игрока (admin или player)"""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT role FROM players WHERE nickname = ?", (nickname,))
-    result = cursor.fetchone()
-    conn.close()
-    return result[0] if result else 'player'
 def update_player_nickname(old_nickname, new_nickname):
     """Изменяет никнейм игрока"""
     if not new_nickname.strip():
