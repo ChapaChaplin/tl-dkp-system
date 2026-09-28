@@ -97,7 +97,7 @@ with t1:
     active_auctions = db.get_active_auctions()
 
     if not active_auctions:
-        st.info("Сейчас нет активных аукционов. Следи за обновлениями — страница обновляется автоматически каждые 10 секунд!")
+        st.info("Сейчас нет активных аукционов. Аукцион обновляется каждые 5 секунд.")
     else:
         for auc in active_auctions:
             auc_id, item_name, start_price, current_max, end_time, winner_name = auc
