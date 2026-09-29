@@ -39,7 +39,7 @@ if not st.session_state.logged_in:
         with st.form("register_form"):
             new_nick = st.text_input("Никнейм")
             new_pass = st.text_input("Придумай пароль", type="password")
-            new_class = st.selectbox("Класс", ["Воин", "Рыцарь", "Ассасин", "Лучник", "Маг", "Жрец", "Другое"])
+            new_class = st.selectbox("Класс", ["DPS", "Танк", "Хил"])
             reg_submitted = st.form_submit_button("Зарегистрироваться", use_container_width=True)
             if reg_submitted:
                 if new_nick.strip() and new_pass:
@@ -241,7 +241,7 @@ if is_admin:
                     current_class = st.session_state.player_class if target_player == st.session_state.nickname else "Воин"
                     new_class = st.selectbox(
                         "⚔️ Класс", 
-                        ["Воин", "Рыцарь", "Ассасин", "Лучник", "Маг", "Жрец", "Другое"])
+                        ["DPS", "Танк", "Хил","Другое"])
   
                 
                 edit_submitted = st.form_submit_button("💾 Сохранить изменения", use_container_width=True, type="primary")
