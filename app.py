@@ -122,9 +122,15 @@ with t1:
 
                 with col3:
                     try:
-                        # Парсим время из Supabase (формат может отличаться)
-                        end_str = str(end_time).split(".")[0].split("+")[0]
-                        end_dt = datetime.strptime(end_str, "%Y-%m-%d %H:%M:%S")
+                        # Парсим время из Supabase (формат ISO 8601)
+                        end_str = str(end_time).split(".")[0].split("+")[0].split("Z")[0]
+                        
+                        # Supabase возвращает формат с "T": 2026-09-29T09:44:47
+                        if "T" in end_str:
+                            end_dt = datetime.strptime(end_str, "%Y-%m-%dT%H:%M:%S")
+                        else:
+                            end_dt = datetime.strptime(end_str, "%Y-%m-%d %H:%M:%S")
+                        
                         remaining = (end_dt - datetime.now()).total_seconds()
                         if remaining > 0:
                             mins = int(remaining // 60)
