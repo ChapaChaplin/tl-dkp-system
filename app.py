@@ -99,13 +99,9 @@ with t1:
         st.rerun()
     
     active_auctions = db.get_active_auctions()
-    # ... дальше код остается без изменений ...
-    st.subheader("🔨 Аукцион")
-
-    active_auctions = db.get_active_auctions()
 
     if not active_auctions:
-        st.info("Сейчас нет активных аукционов.")
+        st.info("Сейчас нет активных аукционов. Нажми кнопку выше, чтобы проверить новые лоты!")
     else:
         for auc in active_auctions:
             auc_id, item_name, start_price, current_max, end_time, winner_name = auc
@@ -126,7 +122,9 @@ with t1:
 
                 with col3:
                     try:
-                        end_dt = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+                        # Парсим время из Supabase (формат может отличаться)
+                        end_str = str(end_time).split(".")[0].split("+")[0]
+                        end_dt = datetime.strptime(end_str, "%Y-%m-%d %H:%M:%S")
                         remaining = (end_dt - datetime.now()).total_seconds()
                         if remaining > 0:
                             mins = int(remaining // 60)
@@ -135,8 +133,8 @@ with t1:
                             st.markdown(f"⏰ {color} **{mins}:{secs:02d}**")
                         else:
                             st.markdown("⏰ **Завершён**")
-                    except:
-                        pass
+                    except Exception as e:
+                        st.caption(f"⏰ До: {end_time}")
 
                 # Форма ставки
                 with st.form(key=f"bid_form_{auc_id}"):
