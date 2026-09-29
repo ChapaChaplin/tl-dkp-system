@@ -164,6 +164,24 @@ with t1:
                         else:
                             st.error(f"❌ {message}")
 
+                # Кнопка отмены аукциона (только для админа)
+                if is_admin:
+                    with st.form(key=f"cancel_form_{auc_id}"):
+                        st.warning("⚠️ Отмена аукциона удалит его из активных лотов")
+                        confirm_cancel = st.checkbox(f"☑️ Подтверждаю отмену аукциона '{item_name}'")
+                        cancel_btn = st.form_submit_button("❌ Отменить аукцион", use_container_width=True, type="secondary")
+                        
+                        if cancel_btn:
+                            if confirm_cancel:
+                                success, message = db.cancel_auction(auc_id)
+                                if success:
+                                    st.success(f"✅ {message}")
+                                    st.rerun()
+                                else:
+                                    st.error(f"❌ {message}")
+                            else:
+                                st.warning("Поставь галочку подтверждения!")
+
                 # История ставок
                 bids = db.get_auction_bids(auc_id)
                 if bids:

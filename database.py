@@ -317,3 +317,9 @@ def get_all_transactions():
             transactions.append((player_resp.data[0]["nickname"], t["amount"], t["type"], t["description"], t["created_at"]))
     
     return transactions
+def cancel_auction(auction_id):
+    """Отменяет аукцион, изменяя его статус на 'cancelled'"""
+    response = supabase.table("auctions").update({"status": "cancelled"}).eq("id", auction_id).execute()
+    if response.data:
+        return True, "Аукцион отменен"
+    return False, "Не удалось отменить аукцион"
