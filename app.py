@@ -68,7 +68,7 @@ is_admin = st.session_state.role == "admin"
 # Шапка
 st.title(f"⚔️ TL DKP Гильдии HEID")
 st.markdown(f"**👤 {st.session_state.nickname}** ({st.session_state.player_class}) | "
-            f"{'👑 Офицер' if is_admin else '⚔️ Игрок'} | "
+            f"{'👑 Офицер' if is_admin else '⚔️ Игрок'} | ")
 
 # Кнопка выхода в сайдбаре
 with st.sidebar:
