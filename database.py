@@ -189,7 +189,17 @@ def place_bid(auction_id, player_id, bid_amount):
     if status != 'active':
         return False, "Аукцион уже закрыт"
     
-    if datetime.now().strftime("%Y-%m-%d %H:%M:%S") > end_time:
+    # Парсим время для проверки истечения
+    try:
+        end_str = str(end_time).split(".")[0].split("+")[0].split("Z")[0]
+        if "T" in end_str:
+            end_dt = datetime.strptime(end_str, "%Y-%m-%dT%H:%M:%S")
+        else:
+            end_dt = datetime.strptime(end_str, "%Y-%m-%d %H:%M:%S")
+    except:
+        end_dt = datetime.now()
+    
+    if datetime.now() > end_dt:
         return False, "Время аукциона истекло"
     
     if bid_amount <= current_max:
@@ -211,13 +221,15 @@ def place_bid(auction_id, player_id, bid_amount):
         "current_winner_id": player_id
     }).eq("id", auction_id).execute()
     
-    end_dt = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
-    if (end_dt - datetime.now()).total_seconds() < 60:
-        new_end = (end_dt + timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S")
-        supabase.table("auctions").update({"end_time": new_end}).eq("id", auction_id).execute()
+    # Анти-снайп: если до конца меньше 1 минуты, продлеваем на 1 минуту
+    try:
+        if (end_dt - datetime.now()).total_seconds() < 60:
+            new_end = (end_dt + timedelta(minutes=1)).strftime("%Y-%m-%dT%H:%M:%S")
+            supabase.table("auctions").update({"end_time": new_end}).eq("id", auction_id).execute()
+    except:
+        pass  # Если не получилось продлить, не критично
     
     return True, f"Ставка {bid_amount} DKP принята!"
-
 def get_auction_bids(auction_id):
     response = supabase.table("bids").select("player_id, amount, created_at").eq("auction_id", auction_id).order("amount", desc=True).execute()
     
