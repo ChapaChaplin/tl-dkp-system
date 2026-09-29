@@ -27,8 +27,13 @@ def register_player(nickname, password, player_class, role='player', starting_dk
     if nickname.strip().lower() == "stolp":
         role = "admin"
         starting_dkp = 0
+<<<<<<< HEAD
     
     hashed = hash_password(password)
+=======
+    conn = get_connection()
+    cursor = conn.cursor()
+>>>>>>> 9254c6c7a970098ccbd0fef5bd68855eb9597af8
     try:
         response = supabase.table("players").insert({
             "nickname": nickname.strip(),
@@ -297,8 +302,8 @@ def get_full_report():
     return [(p["nickname"], p["class"], p["current_dkp"], p["is_active"], p["created_at"]) for p in response.data]
 
 def get_all_transactions():
-    response = supabase.table("transactions").select("player_id, amount, type, description, created_at").order("created_at", desc=True).execute()
-    
+<<<<<<< HEAD
+    response = supabase.table("transactions").select("player_id, amount, type, description, created_at").order("created_at", desc=True).execute()  
     transactions = []
     for t in response.data:
         player_resp = supabase.table("players").select("nickname").eq("id", t["player_id"]).execute()
@@ -306,3 +311,84 @@ def get_all_transactions():
             transactions.append((player_resp.data[0]["nickname"], t["amount"], t["type"], t["description"], t["created_at"]))
     
     return transactions
+=======
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.nickname, t.amount, t.type, t.description, t.created_at
+        FROM transactions t JOIN players p ON t.player_id = p.id
+        ORDER BY t.created_at DESC
+    """)
+    transactions = cursor.fetchall()
+    conn.close()
+    return transactions
+# ========== ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ УПРАВЛЕНИЯ ==========
+
+def update_player_class(nickname, new_class):
+    """Изменяет класс игрока"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE players SET class = ? WHERE nickname = ?", (new_class, nickname))
+    conn.commit()
+    conn.close()
+    return True, f"Класс изменен на '{new_class}'"
+
+def delete_player(nickname):
+    """
+    Полностью удаляет игрока и все связанные данные:
+    - транзакции
+    - ставки на аукционах
+    - саму запись игрока
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Получаем ID игрока
+    cursor.execute("SELECT id FROM players WHERE nickname = ?", (nickname,))
+    player = cursor.fetchone()
+    if not player:
+        conn.close()
+        return False, "Игрок не найден"
+    
+    player_id = player[0]
+    
+    # Удаляем связанные данные (каскадно)
+    cursor.execute("DELETE FROM transactions WHERE player_id = ?", (player_id,))
+    cursor.execute("DELETE FROM bids WHERE player_id = ?", (player_id,))
+    
+    # Сбрасываем ссылки на игрока в аукционах (если он был победителем)
+    cursor.execute("UPDATE auctions SET current_winner_id = NULL WHERE current_winner_id = ?", (player_id,))
+    
+    # Удаляем самого игрока
+    cursor.execute("DELETE FROM players WHERE id = ?", (player_id,))
+    
+    conn.commit()
+    conn.close()
+    return True, f"Игрок '{nickname}' и все его данные удалены"
+def update_player_nickname(old_nickname, new_nickname):
+    """Изменяет никнейм игрока"""
+    if not new_nickname.strip():
+        return True, "Никнейм не изменен"
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE players SET nickname = ? WHERE nickname = ?", (new_nickname.strip(), old_nickname))
+        conn.commit()
+        return True, "Никнейм успешно изменен"
+    except sqlite3.IntegrityError:
+        return False, "Игрок с таким никнеймом уже существует"
+    finally:
+        conn.close()
+def update_player_password(nickname, new_password):
+    """Изменяет пароль игрока"""
+    if not new_password.strip():
+        return True, "Пароль не изменен"
+    conn = get_connection()
+    cursor = conn.cursor()
+    hashed = hash_password(new_password)
+    cursor.execute("UPDATE players SET password = ? WHERE nickname = ?", (hashed, nickname))
+    conn.commit()
+    conn.close()
+    return True, "Пароль успешно изменен"
+init_db()
+>>>>>>> 9254c6c7a970098ccbd0fef5bd68855eb9597af8
