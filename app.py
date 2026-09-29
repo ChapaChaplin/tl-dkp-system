@@ -254,10 +254,6 @@ if is_admin:
                     if success:
                         changes_made.append(f"✅ Класс: {new_class}")
                     
-                    # 4. Меняем роль
-                    success, message = db.update_player_role(target_player, new_role)
-                    if success:
-                        changes_made.append(f"✅ Роль: {new_role}")
                     
                     if changes_made:
                         st.success("Изменения сохранены:")
