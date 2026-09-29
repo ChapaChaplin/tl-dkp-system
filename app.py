@@ -56,7 +56,7 @@ if not st.session_state.logged_in:
 # ===================== ОСНОВНОЙ ИНТЕРФЕЙС =====================
 
 # Автообновление каждые 10 секунд
-st_autorefresh(interval=10000, key="auction_refresh")
+# st_autorefresh(interval=5000, key="auction_refresh")
 
 # Обновляем баланс из БД
 fresh_dkp = db.get_player_dkp(st.session_state.nickname)
@@ -92,6 +92,14 @@ else:
 
 # ===================== 🔨 АУКЦИОН (для всех) =====================
 with t1:
+    st.subheader("🔨 Аукцион")
+    
+    # Кнопка ручного обновления
+    if st.button("🔄 Обновить аукционы", use_container_width=True):
+        st.rerun()
+    
+    active_auctions = db.get_active_auctions()
+    # ... дальше код остается без изменений ...
     st.subheader("🔨 Аукцион")
 
     active_auctions = db.get_active_auctions()
